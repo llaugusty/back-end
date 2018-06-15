@@ -2,7 +2,6 @@ const chalk = require('chalk');
 const startGanache = require('./helpers/start-ganache')
 const buildContracts = require('./helpers/build-contracts')
 const deployContracts = require('./helpers/deploy-contracts')
-const startIpfs = require('./helpers/start-ipfs')
 const startTestServer = require('./helpers/start-test-server')
 const watch = require('node-watch')
 const webpack = require('webpack')

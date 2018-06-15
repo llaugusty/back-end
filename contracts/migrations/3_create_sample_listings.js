@@ -27,7 +27,7 @@ const populateIpfs = () =>
 async function deploy_sample_contracts(network) {
 
   var data = await populateIpfs();
-  var cost = [1, 2, 3, 4, 5];
+  var cost = [web3.toWei(3, "ether"), web3.toWei(0.6, "ether"), web3.toWei(8.5, "ether"), web3.toWei(1.5, "ether"), web3.toWei(0.3, "ether")];
 
   let accounts = await new Promise((resolve, reject) => {
     web3.eth.getAccounts((error, result) => {
@@ -75,12 +75,12 @@ async function deploy_sample_contracts(network) {
   ];
 
   for (var i = 0; i < 4; ++i) {
-    await listingsRegistry.create(data[i].hash, cost[i], 1, additionalInfo[i]);
+    await listingsRegistry.create(data[i].hash, cost[i], 150, additionalInfo[i]);
   }
   const ticketsTransaction = await listingsRegistry.create(
     data[4].hash,
     cost[4],
-    1,
+    150,
     additionalInfo[4]
   )
 
@@ -96,18 +96,16 @@ async function deploy_sample_contracts(network) {
 
     var purchaseData = await purchase.data();
 
-    console.log('purchase', purchaseData)
+    purchase = await buyListing(ticketsListing, 1, a_buyer_account)
+    await purchase.sellerConfirmShipped({ from: default_account })
 
-    // purchase = await buyListing(ticketsListing, 1, a_buyer_account)
-    // await purchase.sellerConfirmShipped({ from: default_account })
+    purchase = await buyListing(ticketsListing, 1, another_buyer_account)
+    await purchase.sellerConfirmShipped({ from: default_account })
+    await purchase.buyerConfirmReceipt(5, "", { from: another_buyer_account })
 
-    // purchase = await buyListing(ticketsListing, 1, another_buyer_account)
-    // await purchase.sellerConfirmShipped({ from: default_account })
-    // await purchase.buyerConfirmReceipt(5, "", { from: another_buyer_account })
-
-    // purchase = await buyListing(ticketsListing, 1, another_buyer_account)
-    // await purchase.sellerConfirmShipped({ from: default_account })
-    // await purchase.buyerConfirmReceipt(3, "", { from: another_buyer_account })
-    // await purchase.sellerCollectPayout(4,"",{ from: default_account })
+    purchase = await buyListing(ticketsListing, 1, another_buyer_account)
+    await purchase.sellerConfirmShipped({ from: default_account })
+    await purchase.buyerConfirmReceipt(3, "", { from: another_buyer_account })
+    await purchase.sellerCollectPayout(4,"",{ from: default_account })
   }
 }
