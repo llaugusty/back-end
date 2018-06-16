@@ -2,6 +2,31 @@ var ListingsRegistry = artifacts.require("./ListingsRegistry.sol");
 var Listing = artifacts.require("./Listing.sol");
 var Purchase = artifacts.require("./Purchase.sol");
 var ipfsAPI = require('ipfs-api')
+const os = require("os")
+var ifaces = os.networkInterfaces();
+var self = this;
+var myIP;
+
+Object.keys(ifaces).forEach(function (ifname) {
+  var alias = 0;
+
+  ifaces[ifname].forEach(function (iface) {
+    if ('IPv4' !== iface.family || iface.internal !== false) {
+      // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+      return;
+    }
+
+    if (alias >= 1) {
+      // this single interface has multiple ipv4 addresses
+      console.log(ifname + ':' + alias, iface.address);
+    } else {
+      // this interface has only one ipv4 adress
+      console.log(ifname, iface.address);
+    }
+    myIP = 'http://' + iface.address;
+    ++alias;
+  });
+});
 
 const fixturesDir = __dirname + '/../fixtures'
 
@@ -73,12 +98,12 @@ async function deploy_sample_contracts(network) {
     { from: default_account, gas: 4476768 },    
     { from: default_account, gas: 4476768 }    
   ];
-
+  console.log('myIPaaa', myIP)
   for (var i = 0; i < 4; ++i) {
-    await listingsRegistry.create(data[i].hash, cost[i], 150, additionalInfo[i]);
+    await listingsRegistry.create(myIP + ':1234/ipfs/' + data[i].hash, cost[i], 150, additionalInfo[i]);
   }
   const ticketsTransaction = await listingsRegistry.create(
-    data[4].hash,
+    myIP + ':1234/ipfs/' + data[4].hash,
     cost[4],
     150,
     additionalInfo[4]
