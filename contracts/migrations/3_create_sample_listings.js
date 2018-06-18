@@ -66,15 +66,20 @@ const populateIpfs = (ipfsd) =>
 
     f.spawn(function (err, ipfsd) {
       if (err) { throw err }
-      var result = Promise.all(datas.map(data => {
-        return ipfsd.api.files.add(data);
-      })).then(completed => { resolve(completed), ipfsd.stop(); });
+      ipfsd.start([], (err, ipfsApi) => {
+        var result = ipfsApi.util.addFromFs(fixturesDir, { recursive: true }, function(err, file) {
+          console.log('errrrr', err);
+          console.log('fillle', file);
+          resolve(file);
+          ipfsd.stop();
+        }) ;
+      });
     })
   })
 
 async function deploy_sample_contracts(network) {
   var data = await populateIpfs();
-  console.log('data', data[0]);
+  console.log('data', data);
   var cost = [web3.toWei(3, "ether"), web3.toWei(0.6, "ether"), web3.toWei(8.5, "ether"), web3.toWei(1.5, "ether"), web3.toWei(0.3, "ether")];
 
   let accounts = await new Promise((resolve, reject) => {
@@ -123,11 +128,11 @@ async function deploy_sample_contracts(network) {
   ];
   console.log('myIPaaa', myIP)
   for (var i = 0; i < 4; ++i) {
-    console.log('ipfs', 'https://ipfs.io/ipfs/' + data[i][0].hash)
-    await listingsRegistry.create('https://ipfs.io/ipfs/' + data[i][0].hash, cost[i], 150, additionalInfo[i]);
+    console.log('ipfs', 'https://ipfs.io/ipfs/' + data[i].hash)
+    await listingsRegistry.create('https://ipfs.io/ipfs/' + data[i].hash, cost[i], 150, additionalInfo[i]);
   }
   const ticketsTransaction = await listingsRegistry.create(
-    'https://ipfs.io/ipfs/' + data[4][0].hash,
+    'https://ipfs.io/ipfs/' + data[4].hash,
     cost[4],
     150,
     additionalInfo[4]
